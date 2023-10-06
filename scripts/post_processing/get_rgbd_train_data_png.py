@@ -324,9 +324,9 @@ if __name__ == "__main__":
 
     for i, traj_name in enumerate(os.listdir(r2d2_data_path)):
         print("I: ", i, "TRAJ NAME: ", traj_name)
-        if traj_name in hf:
-            print("SKIPPED!")
-            continue
+        # if traj_name in hf:
+        #     print("SKIPPED!")
+        #     continue
         start_time = time.time()
         if i > num_trajectories: 
             break
@@ -349,6 +349,8 @@ if __name__ == "__main__":
         assert(actions.shape[0] == left_rgb_im_traj.shape[0])
         assert(right_rgb_im_traj.shape[0] == left_rgb_im_traj.shape[0])
 
+
+        ### DEBUG (comment this out) ###
         assert left_rgb_im_traj.shape[1] == right_rgb_im_traj.shape[1] == tri_depth_im_traj.shape[1] == 3
 
         idxs = list(range(combined_extrinsics.shape[0]))
@@ -368,11 +370,11 @@ if __name__ == "__main__":
         traj_group.create_dataset("extrinsics_traj", data=combined_extrinsics)
         traj_group.create_dataset("camera_matrices", data=cam_matrices)
 
-
         left_rgb_im_traj = left_rgb_im_traj
         right_rgb_im_traj = right_rgb_im_traj
         left_rgb_im_traj = left_rgb_im_traj.astype(np.uint8)
         right_rgb_im_traj = right_rgb_im_traj.astype(np.uint8)
+        tri_depth_im_traj_float = tri_depth_im_traj.copy()
         tri_depth_im_traj = np.clip(tri_depth_im_traj, 0, MAX_DEPTH)
         tri_depth_im_traj = (tri_depth_im_traj / MAX_DEPTH) * 255
         tri_depth_im_traj = tri_depth_im_traj.astype(np.uint8)
@@ -391,6 +393,7 @@ if __name__ == "__main__":
                 cv2.imwrite(os.path.join(rgb_left_dir, f"left_rgb_{t:03}.png"), left_rgb_im_traj[t, camera_idx])
                 cv2.imwrite(os.path.join(rgb_right_dir, f"right_rgb_{t:03}.png"), right_rgb_im_traj[t, camera_idx])
                 cv2.imwrite(os.path.join(depth_dir, f"tri_depth_{t:03}.png"), tri_depth_im_traj[t, camera_idx])
+                np.save(os.path.join(depth_dir, f"tri_depth_float_{t:03}.npy"), tri_depth_im_traj_float[t, camera_idx])
 
         print("TIME ELAPSED: ", time.time() - start_time)
 
